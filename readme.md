@@ -1,1 +1,1 @@
-Forked from bougiel/vuepress-plugin-rss fro personal use
+Forked from bougiel/vuepress-plugin-rss for personal use
