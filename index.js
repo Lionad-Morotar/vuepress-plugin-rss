@@ -32,45 +32,43 @@ module.exports = (
     })
     pages
       .filter(filter)
-      .map((page) => ({
-        ...page,
-        date: new Date(page.frontmatter.date || ''),
-      }))
+      .map((page) => {
+        return {
+          ...page,
+          date: new Date(page.lastUpdated || ''),
+        }
+      })
       .sort((a, b) => b.date - a.date)
       .slice(0, count)
-      .map((page) => ({
-        title: page.frontmatter.title,
-        description: page.frontmatter.description,
-        url: `${hostname}${page.path}`,
-        date: new Date(page.frontmatter.date),
-        custom_elements: [
-          {
-            'content:encoded': {
-              _cdata: (() => {
-                const outFilePath = path.join(
-                  outDir,
-                  page.path
-                    .replace(/\/$/, '/index.html')
-                    .replace(/[^\.html]$/, '.html')
-                )
-                const htmlContent = fs.readFileSync(
-                  decodeURIComponent(outFilePath),
-                  'utf8'
-                )
-                const $ = cheerio.load(htmlContent, { decodeEntities: false })
-                $('.header-anchor').remove()
-                $(selector)
-                  .find('img')
-                  .each(function () {
-                    const src = $(this).attr('src')
-                    $(this).attr('src', hostname + src)
-                  })
-                return $(selector).html()
-              })(),
+      .map((page) => {
+        return {
+          title: page.title,
+          description: page.frontmatter.description,
+          url: `${hostname}${page.path}`,
+          date: new Date(page.lastUpdated),
+          custom_elements: [
+            {
+              'content:encoded': {
+                _cdata: (() => {
+                  const outFilePath = path.join(
+                    outDir,
+                    page.path
+                      .replace(/\/$/, '/index.html')
+                      .replace(/[^\.html]$/, '.html')
+                  )
+                  const htmlContent = fs.readFileSync(
+                    decodeURIComponent(outFilePath),
+                    'utf8'
+                  )
+                  const $ = cheerio.load(htmlContent, { decodeEntities: false })
+                  $('.table-of-contents').remove()
+                  return $(selector).html()
+                })(),
+              },
             },
-          },
-        ],
-      }))
+          ],
+        }
+      })
       .forEach((page) => feed.item(page))
     fs.writeFile(
       path.join(outDir, 'rss.xml'),
