@@ -61,8 +61,19 @@ module.exports = (
                     'utf8'
                   )
                   const $ = cheerio.load(htmlContent, { decodeEntities: false })
-                  $('.table-of-contents').remove()
-                  return $(selector).html()
+                  const store = $('.table-of-contents')
+                  const contents = store.html() || ''
+                  const urlPadding = `${hostname}${page.path}`
+                  
+                  let result
+                  try {
+                      result = contents.replace(/(href=")([^"]*)/g, `$1${urlPadding}$2`)
+                  } catch (err) {
+                    console.error('ERROR on: ', page.path)
+                    console.error('REASON: ', err)
+                  }
+
+                  return result
                 })(),
               },
             },
